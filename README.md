@@ -2,3 +2,9 @@
 
 脚本编辑器窗口浮动
 
+
+
+Click here to float.
+
+![](image.png)
+
