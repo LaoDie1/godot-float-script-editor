@@ -91,14 +91,20 @@ func _enter_tree():
 	
 	dialog.window_input.connect(func(event):
 		if event is InputEventKey:
-			if event.pressed and event.ctrl_pressed:
-				if event.keycode == KEY_S:
-					Engine.get_main_loop().root.push_unhandled_input(event, true)
-					dialog.move_to_foreground()
+			if event.pressed:
+				if event.ctrl_pressed:
+					if event.keycode == KEY_S:
+						Engine.get_main_loop().root.push_unhandled_input(event, true)
+						dialog.move_to_foreground()
+					elif event.keycode == KEY_F and event.shift_pressed:
+						Engine.get_main_loop().root.push_unhandled_input(event, true)
+					
+				else:
+					if event.keycode == KEY_F1:
+						Engine.get_main_loop().root.push_unhandled_input(event, true)
+			
 		
 	)
-	
-	
 
 
 func _exit_tree():
