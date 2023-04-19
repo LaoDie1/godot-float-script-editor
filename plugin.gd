@@ -33,12 +33,14 @@ func _enter_tree():
 	
 	# 浮动窗口
 	dialog.title = "Script Editor Dialog"
-	dialog.size = Vector2(500, 350)
+	dialog.size = script_editor.size
 	dialog.wrap_controls = true
 	dialog.visible = false
 	dialog.handle_input_locally = false
 	dialog.gui_embed_subwindows = true
-	script_editor.add_child(dialog)
+	get_editor_interface() \
+		.get_base_control() \
+		.add_child(dialog)
 	dialog.close_requested.connect(func(): float_button.button_pressed = false )
 	
 	# 容器节点
@@ -88,19 +90,23 @@ func _enter_tree():
 	
 	self.main_screen_changed.connect(_main_changed)
 	
-	
+	# 解决快捷键问题
 	dialog.window_input.connect(func(event):
 		if event is InputEventKey:
 			if event.pressed:
 				if event.ctrl_pressed:
-					if event.keycode == KEY_S:
+					if event.keycode in [KEY_S, KEY_L]:
 						Engine.get_main_loop().root.push_unhandled_input(event, true)
 						dialog.move_to_foreground()
-					elif event.keycode == KEY_F and event.shift_pressed:
+					elif event.keycode in [KEY_F, KEY_F5] and event.shift_pressed:
 						Engine.get_main_loop().root.push_unhandled_input(event, true)
+				elif event.alt_pressed:
+					if event.keycode in [KEY_LEFT, KEY_RIGHT]:
+						Engine.get_main_loop().root.push_unhandled_input(event, true)
+						dialog.move_to_foreground()
 					
 				else:
-					if event.keycode == KEY_F1:
+					if event.keycode in [KEY_F1, KEY_F5, KEY_F6, KEY_F7, KEY_F8]:
 						Engine.get_main_loop().root.push_unhandled_input(event, true)
 			
 		
@@ -158,6 +164,11 @@ func get_current_screen() -> String:
 				return "Script"
 			"EditorAssetsLibrary":
 				return "AssetLib"
+			_:
+				if child.name.hash("@"):
+					return child.get_class()
+				return child.name
+	
 	# default 2D viewport
 	return "2D"
 
@@ -167,12 +178,13 @@ func get_current_screen() -> String:
 #============================================================
 func _main_changed(screen_name: String):
 	if enable_main_changed:
-		if float_button.button_pressed and screen_name == "Script":
-			_popup()
-			
-			# 如果当前是 Script 视图，则切换到 Script 以外的视图中
-			if get_current_screen() == "Script":
-				_change_to_last_screen()
+		if screen_name == "Script":
+			if float_button.button_pressed:
+				_popup()
+				
+				# 如果当前是 Script 视图，则切换到 Script 以外的视图中
+				if get_current_screen() == "Script":
+					_change_to_last_screen()
 		
 		else:
 			last_main_screen_name = screen_name
