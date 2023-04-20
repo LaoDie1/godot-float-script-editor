@@ -140,6 +140,7 @@ func _change_to_last_screen():
 	get_editor_interface().set_main_screen_editor("Script")
 	if last_main_screen_name == "Script": 
 		last_main_screen_name = "2D"
+	await Engine.get_main_loop().process_frame
 	get_editor_interface().set_main_screen_editor(last_main_screen_name)
 
 
@@ -172,9 +173,11 @@ func get_current_screen() -> String:
 	return "2D"
 
 func get_editor_icon(icon_name):
-	if Engine.is_editor_hint:
-		var godot_theme = get_editor_interface().get_base_control().theme
-		return godot_theme.get_icon(icon_name, 'EditorIcons')
+	return get_editor_interface() \
+		.get_base_control() \
+		.get_theme_icon(icon_name, "EditorIcons")
+
+
 
 #============================================================
 #  连接信号
