@@ -37,7 +37,6 @@ func _enter_tree():
 	dialog.wrap_controls = true
 	dialog.visible = false
 	dialog.handle_input_locally = false
-	dialog.gui_embed_subwindows = true
 	get_editor_interface() \
 		.get_base_control() \
 		.add_child(dialog)
