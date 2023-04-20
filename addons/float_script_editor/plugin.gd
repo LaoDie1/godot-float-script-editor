@@ -1,5 +1,5 @@
 #============================================================
-#    Plugin
+#    godot-float-script-editor
 #============================================================
 # - author: zhangxuetu
 # - datetime: 2023-04-19 13:14:14
@@ -32,7 +32,7 @@ func _enter_tree():
 	last_main_screen_name = get_current_screen()
 	
 	# 浮动窗口
-	dialog.title = "Script Editor Dialog"
+	dialog.title = "Godot Engine Script Editor"
 	dialog.size = script_editor.size
 	dialog.wrap_controls = true
 	dialog.visible = false
@@ -59,7 +59,7 @@ func _enter_tree():
 	# 添加浮动菜单按钮
 	var menu_container = script_sub_container.get_child(0)
 	menu_container.add_child(float_button)
-	float_button.text = "Float"
+	float_button.icon = get_editor_icon("ActionCopy")
 	float_button.toggle_mode = true
 	float_button.toggled.connect(func(button_pressed: bool):
 		if button_pressed:
@@ -172,6 +172,10 @@ func get_current_screen() -> String:
 	# default 2D viewport
 	return "2D"
 
+func get_editor_icon(icon_name):
+	if Engine.is_editor_hint:
+		var godot_theme = get_editor_interface().get_base_control().theme
+		return godot_theme.get_icon(icon_name, 'EditorIcons')
 
 #============================================================
 #  连接信号
