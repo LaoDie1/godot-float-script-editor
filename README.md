@@ -1,4 +1,4 @@
-![Plugin Logo](icon.svg)
+![Plugin Logo](icon.png)
 
 # Godot Float Script Editor
 
