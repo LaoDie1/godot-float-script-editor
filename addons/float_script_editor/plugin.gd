@@ -90,6 +90,18 @@ func _enter_tree():
 	self.main_screen_changed.connect(_main_changed)
 	
 	# 解决快捷键问题
+	var history_forward_button : Button
+	var history_back_button : Button
+	for i in range(menu_container.get_child_count() - 1, -1, -1):
+		var button = menu_container.get_child(i)
+		if button is Button:
+			for signal_data in button.get_signal_connection_list("pressed"):
+				if signal_data['callable'].get_method() == "ScriptEditor::_history_forward":
+					history_forward_button = button
+				elif signal_data['callable'].get_method() == "ScriptEditor::_history_back":
+					history_back_button = button
+	
+	# 窗口点击快捷键
 	dialog.window_input.connect(func(event):
 		if event is InputEventKey:
 			if event.pressed:
@@ -97,18 +109,21 @@ func _enter_tree():
 					if event.keycode in [KEY_S, KEY_L]:
 						Engine.get_main_loop().root.push_unhandled_input(event, true)
 						dialog.move_to_foreground()
-					elif event.keycode in [KEY_F, KEY_F5] and event.shift_pressed:
+					elif event.keycode in [KEY_F5] and event.shift_pressed:
 						Engine.get_main_loop().root.push_unhandled_input(event, true)
+					elif event.keycode in [KEY_F] and event.alt_pressed:
+						Engine.get_main_loop().root.push_unhandled_input(event, true)
+				
 				elif event.alt_pressed:
-					if event.keycode in [KEY_LEFT, KEY_RIGHT]:
-						Engine.get_main_loop().root.push_unhandled_input(event, true)
-						dialog.move_to_foreground()
-					
+					if event.keycode == KEY_LEFT:
+						history_back_button.pressed.emit()
+					elif event.keycode == KEY_RIGHT:
+						history_forward_button.pressed.emit()
+				
 				else:
 					if event.keycode in [KEY_F1, KEY_F5, KEY_F6, KEY_F7, KEY_F8]:
 						Engine.get_main_loop().root.push_unhandled_input(event, true)
 			
-		
 	)
 
 
