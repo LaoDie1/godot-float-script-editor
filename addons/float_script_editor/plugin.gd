@@ -109,8 +109,12 @@ func _enter_tree():
 					if event.keycode in [KEY_S, KEY_L]:
 						Engine.get_main_loop().root.push_unhandled_input(event, true)
 						dialog.move_to_foreground()
-					elif event.keycode in [KEY_F5] and event.shift_pressed:
-						Engine.get_main_loop().root.push_unhandled_input(event, true)
+					
+					elif event.keycode == KEY_F and event.shift_pressed:
+						script_editor.get_current_editor().search_in_files_requested.emit("")
+					elif event.keycode == KEY_R and event.shift_pressed:
+						script_editor.get_current_editor().replace_in_files_requested.emit("")
+					
 					elif event.keycode in [KEY_F] and event.alt_pressed:
 						Engine.get_main_loop().root.push_unhandled_input(event, true)
 				
