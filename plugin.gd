@@ -165,7 +165,7 @@ func get_current_screen() -> String:
 			"EditorAssetsLibrary":
 				return "AssetLib"
 			_:
-				if child.name.hash("@"):
+				if str(child.name).contains("@"):
 					return child.get_class()
 				return child.name
 	
