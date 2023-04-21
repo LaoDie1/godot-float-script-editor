@@ -127,6 +127,8 @@ func _enter_tree():
 					
 					elif event.keycode == KEY_R and event.shift_pressed:
 						menus.replace_in_files()
+					
+					dialog.move_to_foreground()
 				
 				elif event.alt_pressed:
 					if event.keycode == KEY_LEFT:
