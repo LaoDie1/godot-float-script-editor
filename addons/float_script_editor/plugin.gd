@@ -37,6 +37,10 @@ func _enter_tree():
 	dialog.wrap_controls = true
 	dialog.visible = false
 	dialog.handle_input_locally = false
+	if dialog.size.x < 500:
+		dialog.size.x = 500
+	if dialog.size.y < 350:
+		dialog.size.y = 350
 	get_editor_interface() \
 		.get_base_control() \
 		.add_child(dialog)
