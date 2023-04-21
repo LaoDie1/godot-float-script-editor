@@ -9,8 +9,13 @@
 extends EditorPlugin
 
 
+const MENU_SCRIPT = preload("menu_script.gd")
+
+
 var script_editor : ScriptEditor
 var script_sub_container : Control
+
+var menus : MENU_SCRIPT
 
 var dialog : Window = Window.new()
 var float_button : Button = Button.new()
@@ -23,27 +28,28 @@ var enable_main_changed: bool = true
 #  内置
 #============================================================
 func _enter_tree():
+	if Time.get_ticks_msec() < 2000:
+		await Engine.get_main_loop().create_timer(0.1).timeout
+	
 	# 代码辑器
 	script_editor = get_editor_interface().get_script_editor()
 	# 代码编辑器子节点容器
 	script_sub_container = script_editor.get_child(0)
-	
 	# 当前屏幕视图
 	last_main_screen_name = get_current_screen()
 	
 	# 浮动窗口
 	dialog.title = "Godot Engine Script Editor"
-	dialog.size = script_editor.size
 	dialog.wrap_controls = true
-	dialog.visible = false
 	dialog.handle_input_locally = false
-	if dialog.size.x < 500:
-		dialog.size.x = 500
-	if dialog.size.y < 350:
-		dialog.size.y = 350
+	dialog.hide()
 	get_editor_interface() \
 		.get_base_control() \
 		.add_child(dialog)
+	dialog.visibility_changed.connect(func(): 
+		dialog.size = script_editor.size
+		dialog.position = script_editor.global_position
+	, Object.CONNECT_ONE_SHOT)
 	dialog.close_requested.connect(func(): float_button.button_pressed = false )
 	
 	# 容器节点
@@ -54,7 +60,7 @@ func _enter_tree():
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	container.set_anchors_preset(Control.PRESET_FULL_RECT)
-	container.size = dialog.size
+	container.set_deferred("size", dialog.size)
 	dialog.size_changed.connect(func(): 
 		container.size = dialog.size
 	)
@@ -72,7 +78,7 @@ func _enter_tree():
 			
 			await Engine.get_main_loop().process_frame
 			_change_to_last_screen()
-			dialog.popup_centered()
+			dialog.popup()
 		
 		else:
 			# 取消浮动
@@ -94,39 +100,41 @@ func _enter_tree():
 	self.main_screen_changed.connect(_main_changed)
 	
 	# 解决快捷键问题
-	var history_forward_button : Button
-	var history_back_button : Button
-	for i in range(menu_container.get_child_count() - 1, -1, -1):
-		var button = menu_container.get_child(i)
-		if button is Button:
-			for signal_data in button.get_signal_connection_list("pressed"):
-				if signal_data['callable'].get_method() == "ScriptEditor::_history_forward":
-					history_forward_button = button
-				elif signal_data['callable'].get_method() == "ScriptEditor::_history_back":
-					history_back_button = button
-	
-	# 窗口点击快捷键
+	menus = MENU_SCRIPT.new()
 	dialog.window_input.connect(func(event):
 		if event is InputEventKey:
 			if event.pressed:
 				if event.ctrl_pressed:
-					if event.keycode in [KEY_S, KEY_L]:
-						Engine.get_main_loop().root.push_unhandled_input(event, true)
-						dialog.move_to_foreground()
+					if event.keycode == KEY_S:
+						if not (event.shift_pressed or event.alt_pressed):
+							Engine.get_main_loop().root.push_unhandled_input(event, true)
+						else:
+							if event.alt_pressed:
+								menus.menu_option(MENU_SCRIPT.FILE_SAVE)
+					
+					elif event.keycode == KEY_O:
+						menus.menu_option(MENU_SCRIPT.FILE_OPEN)
+					
+					elif event.keycode == KEY_N:
+						menus.menu_option(
+							MENU_SCRIPT.FILE_NEW
+							if not event.shift_pressed
+							else MENU_SCRIPT.FILE_NEW_TEXTFILE
+						)
 					
 					elif event.keycode == KEY_F and event.shift_pressed:
-						script_editor.get_current_editor().search_in_files_requested.emit("")
-					elif event.keycode == KEY_R and event.shift_pressed:
-						script_editor.get_current_editor().replace_in_files_requested.emit("")
+						menus.search_in_files()
 					
-					elif event.keycode in [KEY_F] and event.alt_pressed:
-						Engine.get_main_loop().root.push_unhandled_input(event, true)
+					elif event.keycode == KEY_R and event.shift_pressed:
+						menus.replace_in_files()
 				
 				elif event.alt_pressed:
 					if event.keycode == KEY_LEFT:
-						history_back_button.pressed.emit()
+						menus.menu_option(MENU_SCRIPT.WINDOW_PREV)
 					elif event.keycode == KEY_RIGHT:
-						history_forward_button.pressed.emit()
+						menus.menu_option(MENU_SCRIPT.WINDOW_NEXT)
+					elif event.keycode == KEY_S and event.shift_pressed:
+						menus.menu_option(MENU_SCRIPT.FILE_SAVE_ALL)
 				
 				else:
 					if event.keycode in [KEY_F1, KEY_F5, KEY_F6, KEY_F7, KEY_F8]:
