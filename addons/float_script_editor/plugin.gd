@@ -108,6 +108,7 @@ func _enter_tree():
 						else:
 							if event.alt_pressed:
 								menus.menu_option(MENU_SCRIPT.FILE_SAVE)
+								await Engine.get_main_loop().process_frame
 								dialog.move_to_foreground()
 					
 					elif event.keycode == KEY_O:
@@ -134,6 +135,7 @@ func _enter_tree():
 						menus.menu_option(MENU_SCRIPT.WINDOW_NEXT)
 					elif event.keycode == KEY_S and event.shift_pressed:
 						menus.menu_option(MENU_SCRIPT.FILE_SAVE_ALL)
+						await Engine.get_main_loop().process_frame
 						dialog.move_to_foreground()
 				
 				else:
