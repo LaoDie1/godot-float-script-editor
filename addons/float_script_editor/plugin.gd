@@ -105,6 +105,8 @@ func _enter_tree():
 					if event.keycode == KEY_S:
 						if not (event.shift_pressed or event.alt_pressed):
 							Engine.get_main_loop().root.push_unhandled_input(event, true)
+							await Engine.get_main_loop().process_frame
+							dialog.move_to_foreground()
 						else:
 							if event.alt_pressed:
 								menus.menu_option(MENU_SCRIPT.FILE_SAVE)
