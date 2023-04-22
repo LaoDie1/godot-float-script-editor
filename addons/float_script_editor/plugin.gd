@@ -90,9 +90,6 @@ func _enter_tree():
 				script_editor.move_child(script_sub_container, 0)
 			if dialog.visible:
 				dialog.hide()
-			
-			if dialog.visible:
-				dialog.hide()
 			get_editor_interface().set_main_screen_editor("Script")
 		
 	)
@@ -111,6 +108,7 @@ func _enter_tree():
 						else:
 							if event.alt_pressed:
 								menus.menu_option(MENU_SCRIPT.FILE_SAVE)
+								dialog.move_to_foreground()
 					
 					elif event.keycode == KEY_O:
 						menus.menu_option(MENU_SCRIPT.FILE_OPEN)
@@ -128,7 +126,6 @@ func _enter_tree():
 					elif event.keycode == KEY_R and event.shift_pressed:
 						menus.replace_in_files()
 					
-					dialog.move_to_foreground()
 				
 				elif event.alt_pressed:
 					if event.keycode == KEY_LEFT:
@@ -137,6 +134,7 @@ func _enter_tree():
 						menus.menu_option(MENU_SCRIPT.WINDOW_NEXT)
 					elif event.keycode == KEY_S and event.shift_pressed:
 						menus.menu_option(MENU_SCRIPT.FILE_SAVE_ALL)
+						dialog.move_to_foreground()
 				
 				else:
 					if event.keycode in [KEY_F1, KEY_F5, KEY_F6, KEY_F7, KEY_F8]:
