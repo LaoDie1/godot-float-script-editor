@@ -11,7 +11,7 @@ extends EditorScript
 
 
 # 菜单项枚举，调用 [method menu_option] 方法传入下面的枚举
-# see：https://github.com/godotengine/godot/blob/master/editor/plugins/script_editor_plugin.h
+# see：https://github.com/godotengine/godot/blob/4.0/editor/plugins/script_editor_plugin.h
 enum {
 	FILE_NEW,
 	FILE_NEW_TEXTFILE,

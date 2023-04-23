@@ -80,8 +80,6 @@ func edit_option(index: int):
 		.get_current_editor()
 		.get_index()
 	)
-	print("find: ", script_menu_container.get_index())
-	
 	if script_menu_container and script_menu_container.get_child_count() > 0:
 		var search_menu_button = script_menu_container.get_child(1) as MenuButton
 		search_menu_button.get_popup().id_pressed.emit(index)
@@ -89,7 +87,6 @@ func edit_option(index: int):
 
 # 脚本编辑器菜单都会添加到第一个位置，而不是末尾，所以需要倒序查找
 func find_script_menu_container(script_editor_index: int) -> HBoxContainer:
-	print(script_editor_index)
 	var idx : int = 0
 	for i in range(menu_container.get_child_count() - 1, -1, -1):
 		var child = menu_container.get_child(i)
