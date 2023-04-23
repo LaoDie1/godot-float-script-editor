@@ -1,5 +1,5 @@
 #============================================================
-#    Menu Script
+#    Script Editor Plugin Menu Option
 #============================================================
 # - author: zhangxuetu
 # - datetime: 2023-04-21 12:36:27
@@ -11,7 +11,7 @@ extends EditorScript
 
 
 # 菜单项枚举，调用 [method menu_option] 方法传入下面的枚举
-# 见：https://github.com/godotengine/godot/blob/master/editor/plugins/script_editor_plugin.h
+# see：https://github.com/godotengine/godot/blob/4.0/editor/plugins/script_editor_plugin.h
 enum {
 	FILE_NEW,
 	FILE_NEW_TEXTFILE,

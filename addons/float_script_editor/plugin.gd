@@ -9,13 +9,15 @@
 extends EditorPlugin
 
 
-const MENU_SCRIPT = preload("menu_script.gd")
+const ScriptEditorPluginMenuOption = preload("script_editor_plugin_menu_option.gd")
+const ScriptTextEditorEditOption = preload("script_text_editor_edit_option.gd")
 
 
 var script_editor : ScriptEditor
 var script_sub_container : Control
 
-var menus : MENU_SCRIPT
+var plugin_menu_option : ScriptEditorPluginMenuOption
+var editor_edit_option : ScriptTextEditorEditOption
 
 var dialog : Window = Window.new()
 var float_button : Button = Button.new()
@@ -97,7 +99,8 @@ func _enter_tree():
 	self.main_screen_changed.connect(_main_changed)
 	
 	# 解决快捷键问题
-	menus = MENU_SCRIPT.new()
+	plugin_menu_option = ScriptEditorPluginMenuOption.new()
+	editor_edit_option = ScriptTextEditorEditOption.new()
 	dialog.window_input.connect(func(event):
 		if event is InputEventKey:
 			if event.pressed:
@@ -109,34 +112,41 @@ func _enter_tree():
 							dialog.move_to_foreground()
 						else:
 							if event.alt_pressed:
-								menus.menu_option(MENU_SCRIPT.FILE_SAVE)
+								plugin_menu_option.menu_option(ScriptEditorPluginMenuOption.FILE_SAVE)
 								await Engine.get_main_loop().process_frame
 								dialog.move_to_foreground()
 					
 					elif event.keycode == KEY_O:
-						menus.menu_option(MENU_SCRIPT.FILE_OPEN)
+						plugin_menu_option.menu_option(ScriptEditorPluginMenuOption.FILE_OPEN)
 					
 					elif event.keycode == KEY_N:
-						menus.menu_option(
-							MENU_SCRIPT.FILE_NEW
+						plugin_menu_option.menu_option(
+							ScriptEditorPluginMenuOption.FILE_NEW
 							if not event.shift_pressed
-							else MENU_SCRIPT.FILE_NEW_TEXTFILE
+							else ScriptEditorPluginMenuOption.FILE_NEW_TEXTFILE
 						)
 					
-					elif event.keycode == KEY_F and event.shift_pressed:
-						menus.search_in_files()
+					elif event.keycode == KEY_F:
+						if event.shift_pressed:
+							plugin_menu_option.search_in_files()
+						else:
+							#搜索
+							editor_edit_option.edit_option(ScriptTextEditorEditOption.SEARCH_FIND)
 					
-					elif event.keycode == KEY_R and event.shift_pressed:
-						menus.replace_in_files()
-					
+					elif event.keycode == KEY_R:
+						if event.shift_pressed:
+							plugin_menu_option.replace_in_files()
+						else:
+							# 替换
+							editor_edit_option.edit_option(ScriptTextEditorEditOption.SEARCH_REPLACE)
 				
 				elif event.alt_pressed:
 					if event.keycode == KEY_LEFT:
-						menus.menu_option(MENU_SCRIPT.WINDOW_PREV)
+						plugin_menu_option.menu_option(ScriptEditorPluginMenuOption.WINDOW_PREV)
 					elif event.keycode == KEY_RIGHT:
-						menus.menu_option(MENU_SCRIPT.WINDOW_NEXT)
+						plugin_menu_option.menu_option(ScriptEditorPluginMenuOption.WINDOW_NEXT)
 					elif event.keycode == KEY_S and event.shift_pressed:
-						menus.menu_option(MENU_SCRIPT.FILE_SAVE_ALL)
+						plugin_menu_option.menu_option(ScriptEditorPluginMenuOption.FILE_SAVE_ALL)
 						await Engine.get_main_loop().process_frame
 						dialog.move_to_foreground()
 				
