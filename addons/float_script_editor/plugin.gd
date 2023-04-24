@@ -48,7 +48,7 @@ func _enter_tree():
 	get_editor_interface() \
 		.get_base_control() \
 		.add_child(dialog)
-	dialog.visibility_changed.connect(func(): 
+	dialog.visibility_changed.connect(func():
 		dialog.size = script_editor.size
 		dialog.position = script_editor.global_position
 	, Object.CONNECT_ONE_SHOT)
@@ -63,7 +63,7 @@ func _enter_tree():
 	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	container.set_anchors_preset(Control.PRESET_FULL_RECT)
 	container.set_deferred("size", dialog.size)
-	dialog.size_changed.connect(func(): 
+	dialog.size_changed.connect(func():
 		container.size = dialog.size
 	)
 	
@@ -117,7 +117,11 @@ func _enter_tree():
 								dialog.move_to_foreground()
 					
 					elif event.keycode == KEY_O:
-						plugin_menu_option.menu_option(ScriptEditorPluginMenuOption.FILE_OPEN)
+						if event.shift_pressed or event.alt_pressed:
+							Engine.get_main_loop().root.push_unhandled_input(event, true)
+							
+						else:
+							plugin_menu_option.menu_option(ScriptEditorPluginMenuOption.FILE_OPEN)
 					
 					elif event.keycode == KEY_N:
 						plugin_menu_option.menu_option(
@@ -129,6 +133,8 @@ func _enter_tree():
 					elif event.keycode == KEY_F:
 						if event.shift_pressed:
 							plugin_menu_option.search_in_files()
+						elif event.alt_pressed:
+							editor_edit_option.edit_option(ScriptTextEditorEditOption.SEARCH_LOCATE_FUNCTION)
 						else:
 							#搜索
 							editor_edit_option.edit_option(ScriptTextEditorEditOption.SEARCH_FIND)
@@ -139,6 +145,11 @@ func _enter_tree():
 						else:
 							# 替换
 							editor_edit_option.edit_option(ScriptTextEditorEditOption.SEARCH_REPLACE)
+					
+					elif event.keycode == KEY_L:
+						# 跳转行
+						editor_edit_option.edit_option(ScriptTextEditorEditOption.SEARCH_GOTO_LINE)
+						
 				
 				elif event.alt_pressed:
 					if event.keycode == KEY_LEFT:
@@ -183,7 +194,7 @@ func _popup():
 
 func _change_to_last_screen():
 	get_editor_interface().set_main_screen_editor("Script")
-	if last_main_screen_name == "Script": 
+	if last_main_screen_name == "Script":
 		last_main_screen_name = "2D"
 	await Engine.get_main_loop().process_frame
 	get_editor_interface().set_main_screen_editor(last_main_screen_name)
