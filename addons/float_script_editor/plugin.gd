@@ -54,18 +54,23 @@ func _enter_tree():
 	, Object.CONNECT_ONE_SHOT)
 	dialog.close_requested.connect(func(): float_button.button_pressed = false )
 	
-	# 容器节点
-	var container : MarginContainer = MarginContainer.new()
-	var panel : Panel = Panel.new()
-	container.add_child(panel)
-	dialog.add_child(container)
-	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	container.set_anchors_preset(Control.PRESET_FULL_RECT)
-	container.set_deferred("size", dialog.size)
-	dialog.size_changed.connect(func():
-		container.size = dialog.size
+	# 整体的背景
+	var background : PanelContainer = PanelContainer.new()
+	background.set_anchors_preset(Control.PRESET_FULL_RECT)
+	background.theme_changed.connect(func():
+		background.add_theme_stylebox_override("panel", background.get_theme_stylebox("Content", "EditorStyles"))
 	)
+	dialog.add_child(background)
+	background.set_deferred("size", dialog.size)
+	dialog.size_changed.connect(func():
+		background.size = dialog.size
+	)
+	# 容器节点
+	var container : PanelContainer = PanelContainer.new()
+	container.theme_changed.connect(func():
+		container.add_theme_stylebox_override("panel", container.get_theme_stylebox("ScriptEditorPanel", "EditorStyles"))
+	)
+	background.add_child(container)
 	
 	# 添加浮动菜单按钮
 	var menu_container = script_sub_container.get_child(0)
