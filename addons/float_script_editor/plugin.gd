@@ -71,6 +71,9 @@ func _enter_tree():
 	var menu_container = script_sub_container.get_child(0)
 	menu_container.add_child(float_button)
 	float_button.icon = get_editor_icon("ActionCopy")
+	get_editor_interface().get_base_control().theme_changed.connect(func():
+		float_button.icon = get_editor_icon("ActionCopy")
+	)
 	float_button.toggle_mode = true
 	float_button.toggled.connect(func(button_pressed: bool):
 		if button_pressed:
