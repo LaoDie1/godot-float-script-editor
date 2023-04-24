@@ -20,10 +20,19 @@ var plugin_menu_option : ScriptEditorPluginMenuOption
 var editor_edit_option : ScriptTextEditorEditOption
 
 var dialog : Window = Window.new()
-var float_button : Button = Button.new()
+var float_button : Button = FloatButton.new()
 
 var last_main_screen_name: String
 var enable_main_changed: bool = true
+
+
+class FloatButton extends Button:
+	func _ready():
+		toggle_mode = true
+	
+	func _notification(what):
+		if what == NOTIFICATION_THEME_CHANGED:
+			icon = get_theme_icon("ActionCopy", "EditorIcons")
 
 
 #============================================================
@@ -70,8 +79,6 @@ func _enter_tree():
 	# 添加浮动菜单按钮
 	var menu_container = script_sub_container.get_child(0)
 	menu_container.add_child(float_button)
-	float_button.icon = get_editor_icon("ActionCopy")
-	float_button.toggle_mode = true
 	float_button.toggled.connect(func(button_pressed: bool):
 		if button_pressed:
 			# 浮动
@@ -227,12 +234,6 @@ func get_current_screen() -> String:
 	
 	# default 2D viewport
 	return "2D"
-
-func get_editor_icon(icon_name):
-	return get_editor_interface() \
-		.get_base_control() \
-		.get_theme_icon(icon_name, "EditorIcons")
-
 
 
 #============================================================
