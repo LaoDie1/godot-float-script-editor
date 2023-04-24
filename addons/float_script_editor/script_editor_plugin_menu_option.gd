@@ -47,13 +47,52 @@ enum {
 }
 
 
+const ShortcutUtil = preload("shortcut_util.gd")
+
+
+## 按键映射
+var option_keymap : Dictionary = {
+	parse_shortcut_to_hash("Ctrl+N"): FILE_NEW,
+	parse_shortcut_to_hash("Ctrl+Shift+N"): FILE_NEW_TEXTFILE,
+	parse_shortcut_to_hash("Ctrl+Shift+T"): FILE_REOPEN_CLOSED,
+	parse_shortcut_to_hash("Ctrl+Alt+S"): FILE_SAVE,
+	parse_shortcut_to_hash("Shift+Alt+S"): FILE_SAVE_ALL,
+	parse_shortcut_to_hash("Ctrl+Alt+R"): FILE_TOOL_RELOAD_SOFT,
+	parse_shortcut_to_hash("Ctrl+W"): FILE_CLOSE,
+	parse_shortcut_to_hash("Ctrl+Shift+X"): FILE_RUN,
+	parse_shortcut_to_hash("Ctrl+BackSlash"): TOGGLE_SCRIPTS_PANEL,
+	
+	parse_shortcut_to_hash("Alt+Left"): WINDOW_PREV,
+	parse_shortcut_to_hash("Alt+Right"): WINDOW_NEXT,
+	
+	parse_shortcut_to_hash("Ctrl+Shift+F"): SEARCH_IN_FILES,
+	parse_shortcut_to_hash("Ctrl+Shift+R"): REPLACE_IN_FILES,
+}
+
+## 按下之后会再次让此窗口显示到最前显示的快捷键hash值
+var move_to_foreground_keymap_hash_list : Array[int] = [
+	parse_shortcut_to_hash("Ctrl+S"), 
+]
+
+## 输入到 Godot 编辑器窗口上的快捷键hash值
+var editor_input_keymap_hash_list : Array[int] = [
+	parse_shortcut_to_hash("Ctrl+O"), 
+	parse_shortcut_to_hash("Ctrl+Shift+O"), 
+	parse_shortcut_to_hash("Ctrl+Alt+O"),
+	parse_shortcut_to_hash("Shift+Alt+O"),
+	parse_shortcut_to_hash("Ctrl+F12"),
+	parse_shortcut_to_hash("Shift+F11"),
+]
+
+
 var script_editor : ScriptEditor
 var search_button : MenuButton
 
 
+#============================================================
+#    内置
+#============================================================
 func _init():
-	super._init()
-	
 	# 代码辑器
 	script_editor = get_editor_interface().get_script_editor()
 	# 代码编辑器子节点容器
@@ -72,26 +111,53 @@ func _init():
 				break
 
 
+#============================================================
+#    自定义
+#============================================================
+func parse_shortcut_to_hash(shortcut_text: String) -> int:
+	return ShortcutUtil.parse_shortcut(shortcut_text).hash()
+
+
+func menu_option_by_event(event: InputEventKey, dialog: Window) -> void:
+	var event_shortcut_hash : int = ShortcutUtil.event_shortcut_dict(event).hash()
+	if event_shortcut_hash in editor_input_keymap_hash_list:
+		Engine.get_main_loop().root.push_unhandled_input(event, true)
+		event.keycode = KEY_NONE
+		
+	else:
+		
+		var option : int = option_keymap.get(event_shortcut_hash, -1)
+		if option != -1:
+			
+			if option in [SEARCH_IN_FILES, REPLACE_IN_FILES]:
+				var current_editor = get_editor_interface() \
+					.get_script_editor() \
+					.get_current_editor()
+				if current_editor:
+					var code_edit : CodeEdit = current_editor.get_base_editor() as CodeEdit
+					var selected_text : String = code_edit.get_selected_text()
+					if option == SEARCH_IN_FILES:
+						script_editor.get_current_editor().search_in_files_requested.emit(selected_text)
+					else:
+						script_editor.get_current_editor().replace_in_files_requested.emit(selected_text)
+			
+			else:
+				menu_option(option)
+			
+			event.keycode = KEY_NONE
+			
+		else:
+			if event.keycode in [KEY_F1, KEY_F5, KEY_F6, KEY_F7, KEY_F8]:
+				Engine.get_main_loop().root.push_unhandled_input(event, true)
+				event.keycode = KEY_NONE
+	
+	if event_shortcut_hash in move_to_foreground_keymap_hash_list:
+		await Engine.get_main_loop().process_frame
+		dialog.move_to_foreground()
+
+
 ## 执行菜单项
 func menu_option(index: int):
 	search_button.get_popup().id_pressed.emit(index)
-
-
-func search_in_files():
-	var code_edit : CodeEdit = get_editor_interface() \
-		.get_script_editor() \
-		.get_current_editor() \
-		.get_base_editor() as CodeEdit
-	var selected_text = code_edit.get_selected_text()
-	script_editor.get_current_editor().search_in_files_requested.emit(selected_text)
-
-
-func replace_in_files():
-	var code_edit : CodeEdit = get_editor_interface() \
-		.get_script_editor() \
-		.get_current_editor() \
-		.get_base_editor() as CodeEdit
-	var selected_text = code_edit.get_selected_text()
-	script_editor.get_current_editor().replace_in_files_requested.emit(selected_text)
 
 

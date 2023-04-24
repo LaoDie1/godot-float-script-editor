@@ -58,12 +58,34 @@ enum {
 	LOOKUP_SYMBOL,
 }
 
+const ShortcutUtil = preload("shortcut_util.gd")
 
 var script_editor : ScriptEditor
 var search_button : MenuButton
 var menu_container : Control
 
+var option_keymap : Dictionary = {
+	parse_shortcut_to_hash("Ctrl+K"): EDIT_TOGGLE_COMMENT,
+	
+	parse_shortcut_to_hash("Ctrl+F"): SEARCH_FIND,
+	parse_shortcut_to_hash("Ctrl+R"): SEARCH_REPLACE,
+	
+	parse_shortcut_to_hash("Ctrl+L"): SEARCH_GOTO_LINE,
+	parse_shortcut_to_hash("Ctrl+Alt+F"): SEARCH_LOCATE_FUNCTION,
+	
+	parse_shortcut_to_hash("Ctrl+B"): BOOKMARK_GOTO_NEXT,
+	parse_shortcut_to_hash("Ctrl+Alt+B"): BOOKMARK_TOGGLE,
+	parse_shortcut_to_hash("Ctrl+Shift+B"): BOOKMARK_GOTO_PREV,
+	
+	parse_shortcut_to_hash("Ctrl+Space"): EDIT_COMPLETE,
+	parse_shortcut_to_hash("Ctrl+Shift+E"): EDIT_EVALUATE,
+	
+}
 
+
+#============================================================
+#    内置
+#============================================================
 func _init():
 	# 代码辑器
 	script_editor = get_editor_interface().get_script_editor()
@@ -71,6 +93,22 @@ func _init():
 	var script_sub_container = script_editor.get_child(0)
 	# 菜单容器
 	menu_container = script_sub_container.get_child(0)
+
+
+#============================================================
+#    自定义
+#============================================================
+func parse_shortcut_to_hash(shortcut_text: String) -> int:
+	return ShortcutUtil.parse_shortcut(shortcut_text).hash()
+
+
+func edit_option_by_event(event: InputEventKey):
+	var event_shortcut_hash : int = ShortcutUtil.event_shortcut_dict(event).hash()
+	var option : int = option_keymap.get(event_shortcut_hash, -1)
+	if option != -1:
+		edit_option(option)
+		event.keycode = KEY_NONE
+	
 
 
 ## 编辑选项

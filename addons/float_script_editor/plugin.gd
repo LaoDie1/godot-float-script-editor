@@ -57,8 +57,9 @@ func _enter_tree():
 	# 整体的背景
 	var background : PanelContainer = PanelContainer.new()
 	background.set_anchors_preset(Control.PRESET_FULL_RECT)
-	background.theme_changed.connect(func():
-		background.add_theme_stylebox_override("panel", background.get_theme_stylebox("Content", "EditorStyles"))
+	background.add_theme_stylebox_override("panel", get_editor_style("Content"))
+	get_editor_interface().get_base_control().theme_changed.connect(func():
+		background.add_theme_stylebox_override("panel", get_editor_style("Content"))
 	)
 	dialog.add_child(background)
 	background.set_deferred("size", dialog.size)
@@ -67,8 +68,9 @@ func _enter_tree():
 	)
 	# 容器节点
 	var container : PanelContainer = PanelContainer.new()
-	container.theme_changed.connect(func():
-		container.add_theme_stylebox_override("panel", container.get_theme_stylebox("ScriptEditorPanel", "EditorStyles"))
+	container.add_theme_stylebox_override("panel", get_editor_style("ScriptEditorPanel"))
+	get_editor_interface().get_base_control().theme_changed.connect(func():
+		container.add_theme_stylebox_override("panel", get_editor_style("ScriptEditorPanel"))
 	)
 	background.add_child(container)
 	
@@ -112,66 +114,8 @@ func _enter_tree():
 	dialog.window_input.connect(func(event):
 		if event is InputEventKey:
 			if event.pressed:
-				if event.ctrl_pressed:
-					if event.keycode == KEY_S:
-						if not (event.shift_pressed or event.alt_pressed):
-							Engine.get_main_loop().root.push_unhandled_input(event, true)
-							await Engine.get_main_loop().process_frame
-							dialog.move_to_foreground()
-						else:
-							if event.alt_pressed:
-								plugin_menu_option.menu_option(ScriptEditorPluginMenuOption.FILE_SAVE)
-								await Engine.get_main_loop().process_frame
-								dialog.move_to_foreground()
-					
-					elif event.keycode == KEY_O:
-						if event.shift_pressed or event.alt_pressed:
-							Engine.get_main_loop().root.push_unhandled_input(event, true)
-							
-						else:
-							plugin_menu_option.menu_option(ScriptEditorPluginMenuOption.FILE_OPEN)
-					
-					elif event.keycode == KEY_N:
-						plugin_menu_option.menu_option(
-							ScriptEditorPluginMenuOption.FILE_NEW
-							if not event.shift_pressed
-							else ScriptEditorPluginMenuOption.FILE_NEW_TEXTFILE
-						)
-					
-					elif event.keycode == KEY_F:
-						if event.shift_pressed:
-							plugin_menu_option.search_in_files()
-						elif event.alt_pressed:
-							editor_edit_option.edit_option(ScriptTextEditorEditOption.SEARCH_LOCATE_FUNCTION)
-						else:
-							#搜索
-							editor_edit_option.edit_option(ScriptTextEditorEditOption.SEARCH_FIND)
-					
-					elif event.keycode == KEY_R:
-						if event.shift_pressed:
-							plugin_menu_option.replace_in_files()
-						else:
-							# 替换
-							editor_edit_option.edit_option(ScriptTextEditorEditOption.SEARCH_REPLACE)
-					
-					elif event.keycode == KEY_L:
-						# 跳转行
-						editor_edit_option.edit_option(ScriptTextEditorEditOption.SEARCH_GOTO_LINE)
-						
-				
-				elif event.alt_pressed:
-					if event.keycode == KEY_LEFT:
-						plugin_menu_option.menu_option(ScriptEditorPluginMenuOption.WINDOW_PREV)
-					elif event.keycode == KEY_RIGHT:
-						plugin_menu_option.menu_option(ScriptEditorPluginMenuOption.WINDOW_NEXT)
-					elif event.keycode == KEY_S and event.shift_pressed:
-						plugin_menu_option.menu_option(ScriptEditorPluginMenuOption.FILE_SAVE_ALL)
-						await Engine.get_main_loop().process_frame
-						dialog.move_to_foreground()
-				
-				else:
-					if event.keycode in [KEY_F1, KEY_F5, KEY_F6, KEY_F7, KEY_F8]:
-						Engine.get_main_loop().root.push_unhandled_input(event, true)
+				plugin_menu_option.menu_option_by_event(event, dialog)
+				editor_edit_option.edit_option_by_event(event)
 			
 	)
 
@@ -216,6 +160,7 @@ func get_current_screen_node() -> Control:
 			return child
 	return null
 
+
 func get_current_screen() -> String:
 	var child = get_current_screen_node()
 	if child is Control and child.visible:
@@ -236,11 +181,17 @@ func get_current_screen() -> String:
 	# default 2D viewport
 	return "2D"
 
-func get_editor_icon(icon_name):
+
+func get_editor_icon(icon_name: StringName) -> Texture2D:
 	return get_editor_interface() \
 		.get_base_control() \
 		.get_theme_icon(icon_name, "EditorIcons")
 
+
+func get_editor_style(style_name: StringName) -> StyleBox:
+	return get_editor_interface() \
+		.get_base_control() \
+		.get_theme_stylebox(style_name, "EditorStyles")
 
 
 #============================================================
