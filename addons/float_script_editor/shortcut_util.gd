@@ -9,9 +9,11 @@
 extends EditorScript
 
 
+const CONTROL_KEY = ["ctrl", "shift", "alt"]
+
+
 ## 解析快捷键字符串
 static func parse_shortcut(shortcut_text: String) -> Dictionary:
-	const CONTROL_KEY = {"ctrl": null, "shift": null, "alt": null}
 	var list = shortcut_text.split("+")
 	var keymap : Dictionary = {
 		"keycode": KEY_NONE,
