@@ -76,6 +76,7 @@ var move_to_foreground_keymap_hash_list : Array[int] = [
 
 ## 输入到 Godot 编辑器窗口上的快捷键hash值
 var editor_input_keymap_hash_list : Array[int] = [
+	parse_shortcut_to_hash("Ctrl+S"), 
 	parse_shortcut_to_hash("Ctrl+O"), 
 	parse_shortcut_to_hash("Ctrl+Shift+O"), 
 	parse_shortcut_to_hash("Ctrl+Alt+O"),
