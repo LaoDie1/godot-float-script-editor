@@ -23,6 +23,7 @@ var dialog : Window = Window.new()
 var float_button : Button = Button.new()
 
 var last_main_screen_name: String
+var last_window_mode : Window.Mode = Window.MODE_WINDOWED
 var enable_main_changed: bool = true
 
 
@@ -51,6 +52,7 @@ func _enter_tree():
 	dialog.visibility_changed.connect(func():
 		dialog.size = script_editor.size
 		dialog.position = script_editor.global_position
+		last_window_mode = dialog.mode
 	, Object.CONNECT_ONE_SHOT)
 	dialog.close_requested.connect(func(): float_button.button_pressed = false )
 	
@@ -201,6 +203,8 @@ func _main_changed(screen_name: String):
 	if enable_main_changed:
 		if screen_name == "Script":
 			if float_button.button_pressed:
+				if dialog.mode == Window.MODE_MINIMIZED:
+					dialog.mode = last_window_mode
 				_popup()
 				
 				# 如果当前是 Script 视图，则切换到 Script 以外的视图中
