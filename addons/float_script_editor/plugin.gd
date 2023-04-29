@@ -23,6 +23,8 @@ var dialog : Window = Window.new()
 var float_button : Button = Button.new()
 
 var last_main_screen_name: String
+var last_window_mode : Window.Mode = Window.MODE_WINDOWED
+var last_window_rect : Rect2i = Rect2i()
 var enable_main_changed: bool = true
 
 
@@ -48,11 +50,18 @@ func _enter_tree():
 	get_editor_interface() \
 		.get_base_control() \
 		.add_child(dialog)
+	dialog.size_changed.connect(func():
+		await Engine.get_main_loop().process_frame
+		if dialog.mode == Window.MODE_WINDOWED:
+			last_window_rect.position = dialog.position
+			last_window_rect.size = dialog.size
+	)
 	dialog.visibility_changed.connect(func():
 		dialog.size = script_editor.size
 		dialog.position = script_editor.global_position
 	, Object.CONNECT_ONE_SHOT)
 	dialog.close_requested.connect(func(): float_button.button_pressed = false )
+	
 	
 	# 整体的背景
 	var background : PanelContainer = PanelContainer.new()
@@ -90,8 +99,12 @@ func _enter_tree():
 			
 			await Engine.get_main_loop().process_frame
 			_change_to_last_screen()
+			dialog.mode = Window.MODE_WINDOWED
+			if last_window_rect.size != Vector2i(0, 0):
+				dialog.position = last_window_rect.position
+				dialog.size = last_window_rect.size
 			dialog.popup()
-		
+			
 		else:
 			# 取消浮动
 			if script_sub_container != script_editor.get_child(0):
@@ -100,6 +113,11 @@ func _enter_tree():
 					.remove_child(script_sub_container)
 				script_editor.add_child(script_sub_container, true)
 				script_editor.move_child(script_sub_container, 0)
+			
+			if dialog.mode == Window.MODE_WINDOWED:
+				last_window_rect.size = dialog.size
+				last_window_rect.position = dialog.size
+			
 			if dialog.visible:
 				dialog.hide()
 			get_editor_interface().set_main_screen_editor("Script")
@@ -201,6 +219,8 @@ func _main_changed(screen_name: String):
 	if enable_main_changed:
 		if screen_name == "Script":
 			if float_button.button_pressed:
+				if dialog.mode == Window.MODE_MINIMIZED:
+					dialog.mode = last_window_mode
 				_popup()
 				
 				# 如果当前是 Script 视图，则切换到 Script 以外的视图中
