@@ -153,6 +153,7 @@ func menu_option_by_event(event: InputEventKey, dialog: Window) -> void:
 				event.keycode = KEY_NONE
 	
 	if event_shortcut_hash in move_to_foreground_keymap_hash_list:
+		event.keycode = KEY_NONE
 		await Engine.get_main_loop().process_frame
 		dialog.move_to_foreground()
 
